@@ -9,11 +9,12 @@
 //  1.0.0 - Initial Design
 //  1.0.1 - Add functionality with Terry's PIC board && Change BT name to Beefbooks
 //  1.0.2 - On BLE Disconnect reset esp so that it will reestablish connection
+//  1.0.3 - Add ESP reset if fail to establish serial connection, reset only once on BT disconnect
 
 struct {
   int major = 1;
   int minor = 0;
-  int patch = 2;
+  int patch = 3;
 } VERSION;
 
 //const int FW_VERSION = 1001;
@@ -29,6 +30,7 @@ char savedWeight[19];
 int lockLedRed = 13;                         //red lock led on front panel
 int lockLedGreen = 14;                      // green lock len on front panel
 int lockLedBlue = 12;                      // green lock len on front panel
+bool wasConnectedFlag = false;
 
 
 // A Scale object instance on Pin 25 and 27
@@ -271,7 +273,13 @@ void setup() {
   //scale.begin();
   Serial.print("initialize the scale");
   dotDotDotDelay(5);
-  Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
+  try {
+    Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
+  } catch(...) {
+    Serial.print("Could not establish serial connection\nRESTARTING...");
+    ESP.restart(); //ESP.reset();
+  }
+  
   Serial.print("End of setup()");
   dotDotDotDelay(5);
 }
@@ -343,9 +351,27 @@ void loop() {
 
     if (++rx2_pointer >= 24) { //increment pointer and check for overflow
       Serial.println("Buffer Overflow");
+      Serial.println(rx2_pointer + " = " + rx2_buffer[rx2_pointer]);
       rx2_pointer = 0; //reset pointer on buffer overflow
     }
   } // END if (Serial2.available())
+  // else {
+  //   byte weight[] = {0x20, 0x4e, 0x6f, 0x20, 0x53, 0x69, 0x67, 0x20,
+  //     0x20,
+  //     units[0],
+  //     units[1],
+  //     0x20,
+  //     ng[0],
+  //     ng[1],
+  //     0x0d,
+  //     0x0a,
+  //     0x00
+  //   };
+  //   byte testValue[] = {
+  //     0x02,
+  //     0x00
+  //   };
+  // }
 
   if (process_buffer_flag) {
     //Serial.println(weightStr);
@@ -387,13 +413,14 @@ void loop() {
       // Serial.print(" != ");
       // Serial.println(savedWeight);
 
-      if(!deviceConnected) {
+      if(!deviceConnected && wasConnectedFlag) {
         Serial.println("BLE Disconnected");
         delay(100);
         Serial.println("Resetting ESP");
         ESP.restart(); //ESP.reset();
       }
       if (deviceConnected) {
+        wasConnectedFlag = true;
         //Serial.println("BLE Connected");
         characteristicTX -> setValue((char * ) testValue); //Set a value for notification
         characteristicTX -> notify(); // Notify Smartphone
