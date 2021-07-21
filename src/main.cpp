@@ -4,20 +4,22 @@
 #include <BLEUtils.h>
 #include <BLEServer.h>
 #include <BLE2902.h>
+#include <esp_task_wdt.h>
+
+#define WDT_TIMEOUT 3
 
 //  ---- FIRMWARE UPDATES ====  //
 //  1.0.0 - Initial Design
 //  1.0.1 - Add functionality with Terry's PIC board && Change BT name to Beefbooks
 //  1.0.2 - On BLE Disconnect reset esp so that it will reestablish connection
 //  1.0.3 - Add ESP reset if fail to establish serial connection, reset only once on BT disconnect
+//  1.0.4 - Add delay before establishing seral connection in setup, Enable 3 second watchdog timeout.
 
 struct {
   int major = 1;
   int minor = 0;
-  int patch = 3;
+  int patch = 4;
 } VERSION;
-
-//const int FW_VERSION = 1001;
 
 int RXD2 = 21; // Recieve pin for RS232 from scale
 int TXD2 = 19; // Transmit pin for RS232 from Scale
@@ -182,6 +184,8 @@ void dotDotDotDelay(int seconds) {
 
 void setup() {
 
+
+
     pinMode(lockLedRed,OUTPUT); 
     pinMode(lockLedGreen,OUTPUT); 
     pinMode(lockLedBlue,OUTPUT); 
@@ -190,6 +194,11 @@ void setup() {
   // We then create a service, as well as set the characteristics of sending data.
   Serial.begin(115200);
   Serial.print("Booting Up");
+
+  Serial.println("Configuring WDT...");
+  esp_task_wdt_init(WDT_TIMEOUT, true); //enable panic so ESP32 restarts
+  esp_task_wdt_add(NULL); //add current thread to WDT watch
+
   dotDotDotDelay(5);
   // Make sure LEDs are off first thing
   //ledRGBStatus(0,0,0);
@@ -274,6 +283,7 @@ void setup() {
   Serial.print("initialize the scale");
   dotDotDotDelay(5);
   try {
+    delay(1000);
     Serial2.begin(9600, SERIAL_8N1, RXD2, TXD2);
   } catch(...) {
     Serial.print("Could not establish serial connection\nRESTARTING...");
@@ -434,4 +444,6 @@ void loop() {
   } //if (process_buffer_flag)
   //} //if (deviceConnected)
   delay(5);
+  Serial.println("Resetting WDT...");
+  esp_task_wdt_reset();
 } //void loop()
