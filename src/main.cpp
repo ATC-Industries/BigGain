@@ -22,7 +22,7 @@ struct
   int major = 1;
   int minor = 1;
   int patch = 0;
-  bool beta = true;
+  bool beta = false;
 } VERSION;
 
 Preferences preferences; // initiate an instance of the Preferences library
