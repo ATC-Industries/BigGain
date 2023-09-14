@@ -328,9 +328,7 @@ void initBluetooth(String deviceName)
 
 void initScale()
 {
-  // initialize the scale
-  // scale.begin();
-  Serial.print("initialize the scale");
+  Serial.print("Initializing the scale...");
   dotDotDotDelay(5);
   try
   {
@@ -339,8 +337,9 @@ void initScale()
   }
   catch (...)
   {
-    Serial.print("Could not establish serial connection\nRESTARTING...");
-    ESP.restart(); // ESP.reset();
+    // Handle exceptions that occur during Serial2.begin
+    Serial.print("Could not establish serial connection. RESTARTING...");
+    ESP.restart(); // Alternatively, ESP.reset();
   }
 }
 
