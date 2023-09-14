@@ -17,13 +17,14 @@
 //  1.0.3 - Add ESP reset if fail to establish serial connection, reset only once on BT disconnect
 //  1.0.4 - Add delay before establishing seral connection in setup, Enable 3 second watchdog timeout.
 //  1.1.0 - Add ability to change blutooth device name from BT service.
-//  1.1.1 - BETA Working to fix bug that allows string overload on BT device name
+//  1.1.1 - BETA Working to fix bug that allows string overload on BT device name (NEVER RELEASED)
+//  1.1.2 - BETA Working to fix bug that allows string overload on BT device name and no special charecters. (RELEASE DATE: 2021-09-14)
 
 struct
 {
   int major = 1;
   int minor = 1;
-  int patch = 1;
+  int patch = 2;
   bool beta = true;
 } VERSION;
 
