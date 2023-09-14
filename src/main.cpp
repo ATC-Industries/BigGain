@@ -1,3 +1,8 @@
+#ifdef CONFIG_BTDM_CONTROLLER_BLE_MAX_CONN
+#undef CONFIG_BTDM_CONTROLLER_BLE_MAX_CONN
+#endif
+#define CONFIG_BTDM_CONTROLLER_BLE_MAX_CONN 9
+
 #include <Arduino.h>
 #include <WiFi.h>
 #include <BLEDevice.h>
@@ -20,10 +25,10 @@
 
 struct Version
 {
-  int major = 1;
-  int minor = 2;
-  int patch = 0;
-  bool beta = true;
+  const int major = 1;
+  const int minor = 2;
+  const int patch = 0;
+  const bool beta = true;
 
   String toString() const
   {
@@ -35,35 +40,38 @@ Version VERSION;
 
 Preferences preferences; // initiate an instance of the Preferences library
 
-int RXD2 = 21;                // Recieve pin for RS232 from scale
-int TXD2 = 19;                // Transmit pin for RS232 from Scale
-char rx2_buffer[25];          // rs 232 port 2 recieve string from scale
-static int rx2_pointer;       // pointer for rs 232 port 2 rx string
-bool process_buffer_flag = 0; // flag to signal to process rx2 string
-bool lock_flag = 0;           // flag for lock condition
-char weightStr[19];           // Weight String
-char savedWeight[19];
-int lockLedRed = 13;   // red lock led on front panel
-int lockLedGreen = 14; // green lock len on front panel
-int lockLedBlue = 12;  // green lock len on front panel
+// RS232 Config
+const int RXD2 = 21;
+const int TXD2 = 19;
+constexpr int RX_BUFFER_SIZE = 25;
+char rx2_buffer[RX_BUFFER_SIZE];
+static int rx2_pointer;
+bool process_buffer_flag = false;
+bool lock_flag = false;
+
+// LED Config
+const int lockLedRed = 13;
+const int lockLedGreen = 14;
+const int lockLedBlue = 12;
+
+// Weight Data
+constexpr int WEIGHT_STR_SIZE = 19;
+char weightStr[WEIGHT_STR_SIZE];
+char savedWeight[WEIGHT_STR_SIZE];
+
+// BLE Config
+BLECharacteristic *characteristicTX = nullptr;
+BLECharacteristic *pCharacteristic = nullptr;
+bool deviceConnected = false;
 bool wasConnectedFlag = false;
 
-// A Scale object instance on Pin 25 and 27
-/// Scale scale(25,27);
-
-BLECharacteristic *characteristicTX;
-BLECharacteristic *pCharacteristic;
-bool deviceConnected = false; // Flag if device is connected.
-
-#define DEVICE_LOCAL_NAME "Agri-Tronix" // MAX 20 Char
-
-#define SERVICE_UUID "569a1101-b87f-490c-92cb-11ba5ea5167c"
-
-#define CHARACTERISTIC_UUID_RX "569a2001-b87f-490c-92cb-11ba5ea5167c"
-#define CHARACTERISTIC_UUID_TX "569a2000-b87f-490c-92cb-11ba5ea5167c"
-#define CHARACTERISTIC_UUID_RX2 "569a2003-b87f-490c-92cb-11ba5ea5167c"
-#define CHARACTERISTIC_UUID_TX2 "569a2002-b87f-490c-92cb-11ba5ea5167c"
-#define DEVICE_NAME "00002a00-0000-1000-8000-00805f9b34fb"
+constexpr char DEVICE_LOCAL_NAME[] = "Agri-Tronix"; // MAX 20 Char
+constexpr char SERVICE_UUID[] = "569a1101-b87f-490c-92cb-11ba5ea5167c";
+constexpr char CHARACTERISTIC_UUID_RX[] = "569a2001-b87f-490c-92cb-11ba5ea5167c";
+constexpr char CHARACTERISTIC_UUID_TX[] = "569a2000-b87f-490c-92cb-11ba5ea5167c";
+constexpr char CHARACTERISTIC_UUID_RX2[] = "569a2003-b87f-490c-92cb-11ba5ea5167c";
+constexpr char CHARACTERISTIC_UUID_TX2[] = "569a2002-b87f-490c-92cb-11ba5ea5167c";
+constexpr char DEVICE_NAME[] = "00002a00-0000-1000-8000-00805f9b34fb";
 
 /**
  * @brief Callback class to direct buttons pressed from app
