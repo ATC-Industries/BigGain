@@ -249,6 +249,14 @@ String truncateDeviceName(const String &deviceName, const String &version, int m
 
 void initBluetooth(String deviceName)
 {
+  preferences.begin("my-app", false);
+  String savedDeviceName = preferences.getString("device_name", String(DEVICE_LOCAL_NAME));
+  preferences.end();
+
+  Serial.print("Starting BLE device with name: ");
+  Serial.println(savedDeviceName);
+  BLEDevice::init(savedDeviceName.c_str());
+
   Serial.print("Starting BLE device");
   dotDotDotDelay(5);
   // Truncate if necessary
