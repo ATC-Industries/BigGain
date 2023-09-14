@@ -114,30 +114,37 @@ class CharacteristicCallbacks : public BLECharacteristicCallbacks
     }
   }
 };
-
 /**
  * @brief Callback class to change device name
- *
  */
 class CharacteristicCallbacksNameChange : public BLECharacteristicCallbacks
 {
   void onWrite(BLECharacteristic *characteristic)
   {
-    //  get the value of the button pressed
     std::string rxValueName = characteristic->getValue();
-    // verify the value exists. (not 0 in length)
-    if (rxValueName.length() > 0)
+
+    if (rxValueName.empty())
+      return;
+
+    if (rxValueName.length() > 20)
     {
-      Serial.print("Recived New Name: ");
-      Serial.println(rxValueName.c_str());
-      preferences.begin("my-app", false);
-      preferences.putString("device_name", rxValueName.c_str());
-      preferences.end();
-      // Restart ESP
-      Serial.print("Restarting ESP");
-      ESP.restart();
+      Serial.println("Name too long");
+      // Optionally: Write a status back to the BLE characteristic
+      return;
     }
-  } // END onWrite
+
+    // Check for any special characters here if needed
+
+    Serial.print("Received New Name: ");
+    Serial.println(rxValueName.c_str());
+
+    preferences.begin("my-app", false);
+    preferences.putString("device_name", rxValueName.c_str());
+    preferences.end();
+
+    Serial.println("Restarting ESP");
+    ESP.restart();
+  }
 };
 
 /**
