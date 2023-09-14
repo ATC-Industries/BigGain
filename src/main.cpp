@@ -50,7 +50,7 @@ BLECharacteristic *characteristicTX;
 BLECharacteristic *pCharacteristic;
 bool deviceConnected = false; // Flag if device is connected.
 
-#define DEVICE_LOCAL_NAME "BeefBooks" // MAX 20 Char
+#define DEVICE_LOCAL_NAME "Agri-Tronix" // MAX 20 Char
 
 #define SERVICE_UUID "569a1101-b87f-490c-92cb-11ba5ea5167c"
 
@@ -137,27 +137,27 @@ class CharacteristicCallbacksNameChange : public BLECharacteristicCallbacks
     // verify the value exists. (not 0 in length)
     if (rxValueName.length() > 0)
     {
-      // Check for that name is less than 20 characters
-      if (rxValueName.length() > 20)
-      {
-        Serial.println("Name too long");
-        return;
-      }
-      // Check for that name is at least 3 characters
-      if (rxValueName.length() < 3)
-      {
-        Serial.println("Name too short");
-        return; // consider sending feedback to client
-      }
-      // Check for invalid characters
-      std::regex namePattern("^[a-zA-Z0-9_-]+$"); // Only letters, numbers, dashes, and underscores
+      // // Check for that name is less than 20 characters
+      // if (rxValueName.length() > 20)
+      // {
+      //   Serial.println("Name too long");
+      //   return;
+      // }
+      // // Check for that name is at least 3 characters
+      // if (rxValueName.length() < 3)
+      // {
+      //   Serial.println("Name too short");
+      //   return; // consider sending feedback to client
+      // }
+      // // Check for invalid characters
+      // std::regex namePattern("^[a-zA-Z0-9_-]+$"); // Only letters, numbers, dashes, and underscores
 
-      if (!std::regex_match(rxValueName, namePattern))
-      {
-        Serial.println("Invalid characters in name");
-        // Send feedback to client
-        return;
-      }
+      // if (!std::regex_match(rxValueName, namePattern))
+      // {
+      //   Serial.println("Invalid characters in name");
+      //   // Send feedback to client
+      //   return;
+      // }
 
       Serial.print("Recived New Name: ");
       Serial.println(rxValueName.c_str());
