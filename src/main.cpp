@@ -75,58 +75,48 @@ constexpr char DEVICE_NAME[] = "00002a00-0000-1000-8000-00805f9b34fb";
 
 /**
  * @brief Callback class to direct buttons pressed from app
- *
  */
 class CharacteristicCallbacks : public BLECharacteristicCallbacks
 {
   void onWrite(BLECharacteristic *characteristic)
   {
-    //  get the value of the button pressed
     std::string rxValue = characteristic->getValue();
-    // verify the value exists. (not 0 in length)
-    if (rxValue.length() > 0)
-    {
+    if (rxValue.empty())
+      return;
 
-      for (int i = 0; i < rxValue.length(); i++)
-      {
-      }
-      // Zero button pressed
-      if (rxValue.find("Z") != -1 || rxValue.find("z") != -1)
-      {
-        Serial.println("Zero Pressed");
-        Serial2.write('\x05');
-        Serial2.write('z');
-        Serial2.write('\x03');
-      }
-      // Tare button pressed
-      else if (rxValue.find("t") != -1 || rxValue.find("T") != -1)
-      {
-        Serial.println("Tare Pressed");
-        Serial2.write("\x05\x74\x03");
-      }
-      // Units button pressed
-      else if (rxValue.find("c") != -1 || rxValue.find("C") != -1)
-      {
-        Serial.println("Units Pressed");
-        Serial2.write('C');
-      }
-      // Net/Gross button pressed
-      else if (rxValue.find("n") != -1 || rxValue.find("N") != -1)
-      {
-        Serial.println("Net Pressed");
-        Serial2.write("\x05n\x03");
-      }
-      else if (rxValue.find("g") != -1 || rxValue.find("G") != -1)
-      {
-        Serial.println("Gross Pressed");
-        Serial2.write("\x05g\x03");
-      }
+    // Convert to lower case for case-insensitive comparison
+    std::transform(rxValue.begin(), rxValue.end(), rxValue.begin(), ::tolower);
+
+    if (rxValue.find('z') != std::string::npos)
+    {
+      Serial.println("Zero Pressed");
+      Serial2.write("\x05z\x03");
     }
-  } // END onWrite
+    else if (rxValue.find('t') != std::string::npos)
+    {
+      Serial.println("Tare Pressed");
+      Serial2.write("\x05t\x03");
+    }
+    else if (rxValue.find('c') != std::string::npos)
+    {
+      Serial.println("Units Pressed");
+      Serial2.write("\x05c\x03");
+    }
+    else if (rxValue.find('n') != std::string::npos)
+    {
+      Serial.println("Net Pressed");
+      Serial2.write("\x05n\x03");
+    }
+    else if (rxValue.find('g') != std::string::npos)
+    {
+      Serial.println("Gross Pressed");
+      Serial2.write("\x05g\x03");
+    }
+  }
 };
 
 /**
- * @brief Callback class to direct buttons pressed from app
+ * @brief Callback class to change device name
  *
  */
 class CharacteristicCallbacksNameChange : public BLECharacteristicCallbacks
