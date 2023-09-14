@@ -195,9 +195,8 @@ void ledRGBStatus(bool red, bool green, bool blue)
   green ? ledOn(lockLedGreen) : ledOff(lockLedGreen);
   blue ? ledOn(lockLedBlue) : ledOff(lockLedBlue);
 }
-
 /**
- * @brief Callbak class that determines if bluetooth is connected.
+ * @brief Callback class that determines if Bluetooth is connected.
  *
  */
 class ServerCallbacks : public BLEServerCallbacks
@@ -205,12 +204,14 @@ class ServerCallbacks : public BLEServerCallbacks
   void onConnect(BLEServer *server)
   {
     deviceConnected = true;
+    Serial.println("Device connected");
     ledOn(lockLedBlue);
   };
 
   void onDisconnect(BLEServer *server)
   {
     deviceConnected = false;
+    Serial.println("Device disconnected");
     ledOff(lockLedBlue);
   }
 };
