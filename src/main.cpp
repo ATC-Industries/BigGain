@@ -252,6 +252,9 @@ void initBluetooth(String deviceName)
   String savedDeviceName = preferences.getString("device_name", String(DEVICE_LOCAL_NAME));
   preferences.end();
 
+  // Truncate the saved device name if necessary
+  savedDeviceName = truncateDeviceName(savedDeviceName, VERSION.toString());
+
   Serial.print("Starting BLE device with name: ");
   Serial.println(savedDeviceName);
 
