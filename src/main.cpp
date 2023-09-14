@@ -255,20 +255,14 @@ void initBluetooth(String deviceName)
 
   Serial.print("Starting BLE device with name: ");
   Serial.println(savedDeviceName);
-  BLEDevice::init(savedDeviceName.c_str());
 
-  Serial.print("Starting BLE device");
-  dotDotDotDelay(5);
-  // Truncate if necessary
-  deviceName = truncateDeviceName(deviceName, VERSION.toString());
   // Build the comboName
-  String comboName = deviceName + '[' + WiFi.macAddress()[13] + "] v" + VERSION.toString();
+  String comboName = savedDeviceName + '[' + WiFi.macAddress()[13] + "] v" + VERSION.toString();
   Serial.println(comboName);
-  dotDotDotDelay(5);
-  Serial.println(DEVICE_LOCAL_NAME);
+
   // Initialize Bluetooth
-  //  BLEDevice::init(DEVICE_LOCAL_NAME);
   BLEDevice::init(comboName.c_str());
+
   // Set Bluetooth power transmistion to 9 (Max Power)
   esp_err_t errRc = esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_DEFAULT, ESP_PWR_LVL_P9);
   esp_ble_tx_power_set(ESP_BLE_PWR_TYPE_ADV, ESP_PWR_LVL_P9);
