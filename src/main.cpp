@@ -47,7 +47,7 @@ BLECharacteristic *characteristicTX;
 BLECharacteristic *pCharacteristic;
 bool deviceConnected = false; // Flag if device is connected.
 
-#define DEVICE_LOCAL_NAME "BeefBooks" // MAX 20 Char
+#define DEVICE_LOCAL_NAME "Agi-Tronix" // MAX 20 Char
 
 #define SERVICE_UUID "569a1101-b87f-490c-92cb-11ba5ea5167c"
 
