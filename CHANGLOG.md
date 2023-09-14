@@ -9,17 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Refactor
 
-- Major refactoring to make code more readable
+- Major refactoring to make code more readable.
+- Introduced truncateDeviceName function to handle device name length issues.
+- Split Bluetooth initialization into initBluetooth function for better modularity.
+- Modularized scale initialization into initScale function.
 
 ### Fixed
 
-- Name length Bug
-- Loss of signal reconnection not working.
+- Fixed bug where device name would exceed BLE advertisement length limits.
+- Implemented reconnection mechanism to handle loss of signal.
+- Resolved issue where changing the device name from the client did not update as expected.
+
+### Added
+
+- Added logic to restart BLE advertising after device name change.
 
 ## [1.1.0-beta]
 
 ### Added
- - Add ability to change blutooth device name from BT service.
+
+- Add ability to change blutooth device name from BT service.
 
 ## [1.0.4]
 
