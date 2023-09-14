@@ -160,10 +160,18 @@ void clear_buffer()
     x = x - 1;
   }
 }
+/**
+ * @brief Initialize LED pins. Call this function in setup().
+ */
+void initLEDs()
+{
+  pinMode(lockLedRed, OUTPUT);
+  pinMode(lockLedGreen, OUTPUT);
+  pinMode(lockLedBlue, OUTPUT);
+}
 
 /**
- * @brief Turn LOCKED LED ON
- *
+ * @brief Turn LED ON
  */
 void ledOn(int ledNum)
 {
@@ -171,47 +179,23 @@ void ledOn(int ledNum)
 }
 
 /**
- * @brief Turn LOCKED LED OFF
- *
+ * @brief Turn LED OFF
  */
 void ledOff(int ledNum)
 {
   digitalWrite(ledNum, HIGH);
 }
 
+/**
+ * @brief Set the status of RGB LEDs
+ */
 void ledRGBStatus(bool red, bool green, bool blue)
 {
-  pinMode(lockLedRed, OUTPUT);
-  pinMode(lockLedGreen, OUTPUT);
-  pinMode(lockLedBlue, OUTPUT);
-
-  if (red)
-  {
-    ledOn(lockLedRed);
-  }
-  else
-  {
-    ledOff(lockLedRed);
-  }
-
-  if (green)
-  {
-    ledOn(lockLedGreen);
-  }
-  else
-  {
-    ledOff(lockLedGreen);
-  }
-
-  if (blue)
-  {
-    ledOn(lockLedBlue);
-  }
-  else
-  {
-    ledOff(lockLedBlue);
-  }
+  red ? ledOn(lockLedRed) : ledOff(lockLedRed);
+  green ? ledOn(lockLedGreen) : ledOff(lockLedGreen);
+  blue ? ledOn(lockLedBlue) : ledOff(lockLedBlue);
 }
+
 /**
  * @brief Callbak class that determines if bluetooth is connected.
  *
@@ -273,9 +257,7 @@ void setup()
   String deviceName = preferences.getString("device_name", String(DEVICE_LOCAL_NAME));
   preferences.end();
 
-  pinMode(lockLedRed, OUTPUT);
-  pinMode(lockLedGreen, OUTPUT);
-  pinMode(lockLedBlue, OUTPUT);
+  initLEDs();
   // We defined that the Bluetooth device name in this step is "ATC Scale" and created a BLE server.
   // We set the callback of the server, because it is responsible for collecting the information received.
   // We then create a service, as well as set the characteristics of sending data.
