@@ -16,14 +16,22 @@
 //  1.0.3 - Add ESP reset if fail to establish serial connection, reset only once on BT disconnect
 //  1.0.4 - Add delay before establishing seral connection in setup, Enable 3 second watchdog timeout.
 //  1.1.0 - Add ability to change blutooth device name from BT service.
+//  1.2.0 - Major Refactor of code and fix bug with device renaming crashing on long names.
 
-struct
+struct Version
 {
   int major = 1;
-  int minor = 1;
+  int minor = 2;
   int patch = 0;
-  bool beta = false;
-} VERSION;
+  bool beta = true;
+
+  String toString() const
+  {
+    return String(major) + "." + String(minor) + "." + String(patch) + (beta ? "-beta" : "");
+  }
+};
+
+Version VERSION;
 
 Preferences preferences; // initiate an instance of the Preferences library
 
@@ -47,7 +55,7 @@ BLECharacteristic *characteristicTX;
 BLECharacteristic *pCharacteristic;
 bool deviceConnected = false; // Flag if device is connected.
 
-#define DEVICE_LOCAL_NAME "Agi-Tronix" // MAX 20 Char
+#define DEVICE_LOCAL_NAME "Agri-Tronix" // MAX 20 Char
 
 #define SERVICE_UUID "569a1101-b87f-490c-92cb-11ba5ea5167c"
 
@@ -56,18 +64,6 @@ bool deviceConnected = false; // Flag if device is connected.
 #define CHARACTERISTIC_UUID_RX2 "569a2003-b87f-490c-92cb-11ba5ea5167c"
 #define CHARACTERISTIC_UUID_TX2 "569a2002-b87f-490c-92cb-11ba5ea5167c"
 #define DEVICE_NAME "00002a00-0000-1000-8000-00805f9b34fb"
-
-/**
- * @brief Get the current Firmware Version
- *
- * @return String
- */
-String getVersion()
-{
-  // String versionNum = String(FW_VERSION / 1000) + "." + String(FW_VERSION % 1000 / 100) + "." + String(FW_VERSION % 100);
-  String versionNum = String(VERSION.major) + "." + String(VERSION.minor) + "." + String(VERSION.patch) + ((VERSION.beta) ? "-beta" : "");
-  return versionNum;
-}
 
 /**
  * @brief Callback class to direct buttons pressed from app
@@ -240,12 +236,35 @@ void dotDotDotDelay(int seconds)
   Serial.println("");
 }
 
+// Function to truncate the device name if it exceeds the maximum length
+String truncateDeviceName(const String &deviceName, const String &version, int maxLength = 30)
+{
+  // Calculate the length of each part
+  int nameLength = deviceName.length();
+  int macPartLength = 3; // '[' + last MAC address char + ']'
+  int versionLength = String(" v" + version).length();
+
+  // Calculate total length
+  int totalLength = nameLength + macPartLength + versionLength;
+
+  // Check if it exceeds the limit
+  if (totalLength > maxLength)
+  {
+    // Truncate deviceName or handle it some other way
+    int excess = totalLength - maxLength;
+    return deviceName.substring(0, deviceName.length() - excess);
+  }
+  return deviceName;
+}
+
 void setup()
 {
   // The begin() method opens a “storage space” with a defined namespace.
   // The false argument means that we’ll use it in read/write mode.
   // Use true to open or create the namespace in read-only mode.
   preferences.begin("my-app", false);
+  // // Clear all keys in this namespace
+  // preferences.clear();
   String deviceName = preferences.getString("device_name", String(DEVICE_LOCAL_NAME));
   preferences.end();
 
@@ -266,10 +285,13 @@ void setup()
   // Make sure LEDs are off first thing
   // ledRGBStatus(0,0,0);
   Serial.print("Software Version: ");
-  Serial.println(getVersion());
+  Serial.println(VERSION.toString());
   Serial.print("Starting BLE device");
   dotDotDotDelay(5);
-  String comboName = deviceName + '[' + WiFi.macAddress()[13] + "] v" + getVersion();
+  // Truncate if necessary
+  deviceName = truncateDeviceName(deviceName, VERSION.toString());
+  // Build the comboName
+  String comboName = deviceName + '[' + WiFi.macAddress()[13] + "] v" + VERSION.toString();
   Serial.println(comboName);
   dotDotDotDelay(5);
   Serial.println(DEVICE_LOCAL_NAME);
