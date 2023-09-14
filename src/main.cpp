@@ -6,6 +6,7 @@
 #include <BLE2902.h>
 #include <esp_task_wdt.h>
 #include <Preferences.h> // use the Preferences.h library to store data
+#include <regex>
 
 #define WDT_TIMEOUT 3
 
@@ -16,13 +17,14 @@
 //  1.0.3 - Add ESP reset if fail to establish serial connection, reset only once on BT disconnect
 //  1.0.4 - Add delay before establishing seral connection in setup, Enable 3 second watchdog timeout.
 //  1.1.0 - Add ability to change blutooth device name from BT service.
+//  1.1.1 - BETA Working to fix bug that allows string overload on BT device name
 
 struct
 {
   int major = 1;
   int minor = 1;
-  int patch = 0;
-  bool beta = false;
+  int patch = 1;
+  bool beta = true;
 } VERSION;
 
 Preferences preferences; // initiate an instance of the Preferences library
@@ -134,6 +136,28 @@ class CharacteristicCallbacksNameChange : public BLECharacteristicCallbacks
     // verify the value exists. (not 0 in length)
     if (rxValueName.length() > 0)
     {
+      // Check for that name is less than 20 characters
+      if (rxValueName.length() > 20)
+      {
+        Serial.println("Name too long");
+        return;
+      }
+      // Check for that name is at least 3 characters
+      if (rxValueName.length() < 3)
+      {
+        Serial.println("Name too short");
+        return; // consider sending feedback to client
+      }
+      // Check for invalid characters
+      std::regex namePattern("^[a-zA-Z0-9_-]+$"); // Only letters, numbers, dashes, and underscores
+
+      if (!std::regex_match(rxValueName, namePattern))
+      {
+        Serial.println("Invalid characters in name");
+        // Send feedback to client
+        return;
+      }
+
       Serial.print("Recived New Name: ");
       Serial.println(rxValueName.c_str());
       preferences.begin("my-app", false);
