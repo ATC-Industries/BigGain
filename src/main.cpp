@@ -28,11 +28,11 @@ struct Version
   const int major = 1;
   const int minor = 2;
   const int patch = 0;
-  const bool beta = true;
+  const bool beta = false;
 
   String toString() const
   {
-    return String(major) + "." + String(minor) + "." + String(patch) + (beta ? "-beta" : "");
+    return String(major) + "." + String(minor) + "." + String(patch) + (beta ? "-B" : "");
   }
 };
 
@@ -142,6 +142,10 @@ class CharacteristicCallbacksNameChange : public BLECharacteristicCallbacks
     preferences.putString("device_name", rxValueName.c_str());
     preferences.end();
 
+    BLEDevice::getAdvertising()->stop();
+    // Change the device name
+    BLEDevice::getAdvertising()->start();
+
     Serial.println("Restarting ESP");
     ESP.restart();
   }
@@ -226,7 +230,7 @@ void dotDotDotDelay(int seconds)
 }
 
 // Function to truncate the device name if it exceeds the maximum length
-String truncateDeviceName(const String &deviceName, const String &version, int maxLength = 30)
+String truncateDeviceName(const String &deviceName, const String &version, int maxLength = 28)
 {
   // Calculate the length of each part
   int nameLength = deviceName.length();
