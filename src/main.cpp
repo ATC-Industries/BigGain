@@ -204,15 +204,14 @@ class ServerCallbacks : public BLEServerCallbacks
   void onConnect(BLEServer *server)
   {
     deviceConnected = true;
-    Serial.println("Device connected");
     ledOn(lockLedBlue);
   };
 
   void onDisconnect(BLEServer *server)
   {
     deviceConnected = false;
-    Serial.println("Device disconnected");
     ledOff(lockLedBlue);
+    BLEDevice::startAdvertising(); // Restart advertising upon disconnection
   }
 };
 
