@@ -247,33 +247,8 @@ String truncateDeviceName(const String &deviceName, const String &version, int m
   return deviceName;
 }
 
-void setup()
+void initBluetooth(String deviceName)
 {
-  // The begin() method opens a “storage space” with a defined namespace.
-  // The false argument means that we’ll use it in read/write mode.
-  // Use true to open or create the namespace in read-only mode.
-  preferences.begin("my-app", false);
-  // // Clear all keys in this namespace
-  // preferences.clear();
-  String deviceName = preferences.getString("device_name", String(DEVICE_LOCAL_NAME));
-  preferences.end();
-
-  initLEDs();
-  // We defined that the Bluetooth device name in this step is "ATC Scale" and created a BLE server.
-  // We set the callback of the server, because it is responsible for collecting the information received.
-  // We then create a service, as well as set the characteristics of sending data.
-  Serial.begin(115200);
-  Serial.print("Booting Up");
-
-  Serial.println("Configuring WDT...");
-  esp_task_wdt_init(WDT_TIMEOUT, true); // enable panic so ESP32 restarts
-  esp_task_wdt_add(NULL);               // add current thread to WDT watch
-
-  dotDotDotDelay(5);
-  // Make sure LEDs are off first thing
-  // ledRGBStatus(0,0,0);
-  Serial.print("Software Version: ");
-  Serial.println(VERSION.toString());
   Serial.print("Starting BLE device");
   dotDotDotDelay(5);
   // Truncate if necessary
@@ -283,7 +258,6 @@ void setup()
   Serial.println(comboName);
   dotDotDotDelay(5);
   Serial.println(DEVICE_LOCAL_NAME);
-
   // Initialize Bluetooth
   //  BLEDevice::init(DEVICE_LOCAL_NAME);
   BLEDevice::init(comboName.c_str());
@@ -350,7 +324,10 @@ void setup()
   pAdvertising->setMinPreferred(0x06); // functions that help with iPhone connections issue
   pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
+}
 
+void initScale()
+{
   // initialize the scale
   // scale.begin();
   Serial.print("initialize the scale");
@@ -365,6 +342,40 @@ void setup()
     Serial.print("Could not establish serial connection\nRESTARTING...");
     ESP.restart(); // ESP.reset();
   }
+}
+
+void initPreferences()
+{
+  // The begin() method opens a “storage space” with a defined namespace.
+  // The false argument means that we’ll use it in read/write mode.
+  // Use true to open or create the namespace in read-only mode.
+  preferences.begin("my-app", false);
+  // // Clear all keys in this namespace
+  // preferences.clear();
+  String deviceName = preferences.getString("device_name", String(DEVICE_LOCAL_NAME));
+  preferences.end();
+}
+
+void setup()
+{
+  initPreferences();
+
+  Serial.begin(115200);
+  Serial.print("Booting Up");
+  Serial.println("Configuring WDT...");
+  esp_task_wdt_init(WDT_TIMEOUT, true);
+  esp_task_wdt_add(NULL);
+
+  dotDotDotDelay(5);
+
+  Serial.print("Software Version: ");
+  Serial.println(VERSION.toString());
+
+  String deviceName = truncateDeviceName(preferences.getString("device_name", String(DEVICE_LOCAL_NAME)), VERSION.toString());
+
+  initBluetooth(deviceName);
+  initLEDs();
+  initScale();
 
   Serial.print("End of setup()");
   dotDotDotDelay(5);
