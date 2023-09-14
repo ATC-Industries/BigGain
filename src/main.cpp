@@ -21,7 +21,7 @@
 //  1.0.3 - Add ESP reset if fail to establish serial connection, reset only once on BT disconnect
 //  1.0.4 - Add delay before establishing seral connection in setup, Enable 3 second watchdog timeout.
 //  1.1.0 - Add ability to change blutooth device name from BT service.
-//  1.2.0 - Major Refactor of code and fix bug with device renaming crashing on long names.
+//  1.2.0 - Major Refactor of code and fix bug with device renaming crashing on long names. Also fix bug of not autoconnecting on range loss
 
 struct Version
 {
